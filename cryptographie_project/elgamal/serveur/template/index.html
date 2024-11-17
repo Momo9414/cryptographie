@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serveur ElGamal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Serveur ElGamal</h1>
+        
+        <!-- Affichage de la clé publique -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">Clé Publique</h2>
+            <div id="publicKey" class="bg-gray-50 p-4 rounded"></div>
+        </div>
+
+        <!-- Historique des messages -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Messages Reçus</h2>
+            <div class="space-y-4">
+                {% for message in messages %}
+                <div class="bg-gray-50 p-4 rounded">
+                    <p><strong>Message chiffré:</strong> {{ message.encrypted }}</p>
+                    <p><strong>Message déchiffré:</strong> {{ message.decrypted }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Affichage de la clé publique
+        fetch('/public_key')
+            .then(response => response.json())
+            .then(data => {
+                const publicKeyDiv = document.getElementById('publicKey');
+                const key = data.public_key;
+                publicKeyDiv.innerHTML = `
+                    <p><strong>p:</strong> ${key.p}</p>
+                    <p><strong>g:</strong> ${key.g}</p>
+                    <p><strong>h:</strong> ${key.h}</p>
+                `;
+            });
+    </script>
+</body>
+</html>

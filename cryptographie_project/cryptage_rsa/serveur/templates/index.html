@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serveur de Déchiffrement RSA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gradient-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        .message-appear {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4 font-bold text-xl">Serveur RSA</div>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition-colors">Tableau de bord</a>
+                    <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition-colors">Historique</a>
+                    <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition-colors">Configuration</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+            <div class="gradient-bg p-6">
+                <h1 class="text-3xl font-bold text-white text-center">Serveur de Déchiffrement RSA</h1>
+                <p class="text-white/80 text-center mt-2">Surveillance et déchiffrement en temps réel</p>
+            </div>
+
+            <!-- Server Status -->
+            <div class="p-6 border-b border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm font-medium text-gray-600">Serveur actif</span>
+                    </div>
+                    <div class="flex space-x-4 text-sm text-gray-500">
+                        <div>
+                            <span class="font-medium">Temps de fonctionnement:</span>
+                            <span class="ml-1">24h 13m</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Messages traités:</span>
+                            <span class="ml-1">{{ messages|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages List -->
+            <div class="p-6">
+                <div class="bg-white rounded-lg overflow-hidden">
+                    <div class="divide-y divide-gray-200">
+                        {% for message in messages %}
+                        <div class="p-6 hover:bg-gray-50 transition-colors message-appear" style="animation-delay: {{ loop.index * 0.1 }}s">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 rounded-full gradient-bg flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="bg-gray-50 p-4 rounded-lg mb-3">
+                                        <h4 class="text-sm font-medium text-gray-900 mb-1">Message chiffré</h4>
+                                        <p class="text-sm font-mono text-gray-600 break-all">{{ message.encrypted }}</p>
+                                    </div>
+                                    <div class="bg-green-50 p-4 rounded-lg">
+                                        <h4 class="text-sm font-medium text-green-900 mb-1">Message déchiffré</h4>
+                                        <p class="text-sm font-mono text-green-700">{{ message.decrypted }}</p>
+                                    </div>
+                                    <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
+                                        <span>ID: #{{ loop.index }}</span>
+                                        <span>{{ message.timestamp|default('Maintenant') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if not messages %}
+                        <div class="p-12 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun message</h3>
+                            <p class="mt-1 text-sm text-gray-500">En attente de nouveaux messages à déchiffrer.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Server Stats -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div class="text-blue-600 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Performance</h3>
+                <p class="text-gray-600">Temps de déchiffrement moyen: 0.3s</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div class="text-green-600 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Fiabilité</h3>
+                <p class="text-gray-600">Taux de succès: 99.9%</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200">
+                <div class="text-purple-600 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Sécurité</h3>
+                <p class="text-gray-600">Clé RSA: 4096 bits</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-gray-400">© 2024 Serveur RSA. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

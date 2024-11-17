@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client ElGamal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Client ElGamal</h1>
+        
+        <!-- Formulaire d'envoi -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">Envoyer un message</h2>
+            <form id="messageForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Message:</label>
+                    <input type="text" name="message" class="w-full p-2 border rounded" required>
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Envoyer
+                </button>
+            </form>
+        </div>
+
+        <!-- Résultats -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Résultats</h2>
+            <div id="results" class="space-y-4">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/send', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                const resultsDiv = document.getElementById('results');
+                const resultElement = document.createElement('div');
+                resultElement.className = 'bg-gray-50 p-4 rounded';
+                
+                if (data.status === 'success') {
+                    resultElement.innerHTML = `
+                        <p><strong>Message chiffré:</strong> ${data.encrypted_message}</p>
+                        <p><strong>Message déchiffré:</strong> ${data.decrypted_message}</p>
+                    `;
+                } else {
+                    resultElement.innerHTML = `
+                        <p class="text-red-500"><strong>Erreur:</strong> ${data.message}</p>
+                    `;
+                }
+                
+                resultsDiv.insertBefore(resultElement, resultsDiv.firstChild);
+                e.target.reset();
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'envoi du message');
+            }
+        });
+    </script>
+</body>
+</html>
